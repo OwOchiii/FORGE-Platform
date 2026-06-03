@@ -7,11 +7,10 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Menu, LogOut, Settings, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 
 export function Navbar() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -97,7 +96,7 @@ export function Navbar() {
                     Settings
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => signOut()} className="text-red-600 dark:text-red-400 cursor-pointer flex items-center gap-2 dark:hover:bg-slate-700">
+                <DropdownMenuItem onClick={() => logout()} className="text-red-600 dark:text-red-400 cursor-pointer flex items-center gap-2 dark:hover:bg-slate-700">
                   <LogOut className="w-4 h-4" />
                   Logout
                 </DropdownMenuItem>

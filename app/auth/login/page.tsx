@@ -8,14 +8,13 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertCircle } from 'lucide-react';
-import { signIn } from 'next-auth/react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading, login } = useAuth();
   const router = useRouter();
 
   // If already logged in, redirect to dashboard
@@ -31,17 +30,8 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (res?.error) {
-        setError('Invalid credentials');
-      } else {
-        router.push('/dashboard');
-      }
+      await login(email, password);
+      router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
