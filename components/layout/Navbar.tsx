@@ -77,9 +77,9 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="gap-2 text-gray-800 dark:text-gray-200">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    {user.name.charAt(0)}
+                    {user.name?.charAt(0) || 'U'}
                   </div>
-                  <span className="hidden sm:inline text-sm">{user.name}</span>
+                  <span className="hidden sm:inline text-sm">{user.name || 'User'}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 dark:bg-slate-800 dark:border-slate-700">
@@ -87,7 +87,7 @@ export function Navbar() {
                   {user.email}
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled className="text-xs text-gray-500 dark:text-gray-400">
-                  Role: {user.role.replace('_', ' ')}
+                  Role: {user.role?.replace('_', ' ') || 'User'}
                 </DropdownMenuItem>
                 <div className="my-1 border-t dark:border-slate-700" />
                 <DropdownMenuItem asChild>
