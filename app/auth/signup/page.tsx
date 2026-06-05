@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { adminSignup } from '@/app/actions/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertCircle, CheckCircle } from 'lucide-react';
@@ -17,14 +17,7 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const { signup, user } = useAuth();
   const router = useRouter();
-
-  // If already logged in, redirect to dashboard
-  if (user) {
-    router.push('/dashboard');
-    return null;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +36,7 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      await signup(email, name, password);
+      await adminSignup(email, name, password);
       setIsSuccess(true);
       // Redirect after 3 seconds
       setTimeout(() => {

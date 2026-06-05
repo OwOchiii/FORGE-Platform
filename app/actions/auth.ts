@@ -1,21 +1,24 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
 
 export async function adminSignup(
   email: string,
   name: string,
   password: string
 ) {
-  const supabase = await createClient();
-  const adminAuthClient = supabase.auth.admin;
+  // Create admin client with service role key for server-side operations
+  const supabase = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   try {
     // Use Admin API to create user with email already confirmed
-    const { data, error } = await adminAuthClient.createUser({
+    const { data, error } = await supabase.auth.admin.createUser({
       email,
       password,
-      email_confirm: true, // Auto-confirm email for MVP
+      email_confirm: true, // Auto-confirm email for MVP (bypasses email verification)
       user_metadata: {
         name,
         role: 'trainee',
