@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { adminSignup } from '@/app/actions/auth';
+import { useAuth } from '@/lib/auth-context';
+import { confirmUserEmail } from '@/app/actions/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertCircle, CheckCircle } from 'lucide-react';
@@ -17,6 +18,7 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const { signup } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,7 +38,12 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      await adminSignup(email, name, password);
+      // Step 1: Sign up the user normally (creates unconfirmed user)
+      await signup(email, name, password);
+      
+      // Step 2: Auto-confirm their email via server action (MVP bypass - no email needed)
+      await confirmUserEmail(email);
+      
       setIsSuccess(true);
       // Redirect after 3 seconds
       setTimeout(() => {

@@ -2,35 +2,33 @@
 
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 
-export async function adminSignup(
-  email: string,
-  name: string,
-  password: string
-) {
-  // Create admin client with service role key for server-side operations
+export async function confirmUserEmail(email: string) {
+  // After regular client-side signup, auto-confirm the email via admin API
+  // This bypasses email verification requirement for MVP without touching dashboard
   const supabase = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
   try {
-    // Use Admin API to create user with email already confirmed
-    const { data, error } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true, // Auto-confirm email for MVP (bypasses email verification)
-      user_metadata: {
-        name,
-        role: 'trainee',
-      },
-    });
+    // List users to find the one we just created
+    const { data: users, error: listError } = await supabase.auth.admin.listUsers();
+    
+    if (listError) throw listError;
 
-    if (error) throw error;
+    const user = users.users.find(u => u.email === email);
+    if (!user) throw new Error('User not found');
 
-    // The profile will be auto-created by the database trigger
-    // when the user is inserted into auth.users
-    return { success: true, user: data.user };
+    // Auto-confirm their email
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      user.id,
+      { email_confirm: true }
+    );
+
+    if (updateError) throw updateError;
+
+    return { success: true, userId: user.id };
   } catch (error) {
-    throw error instanceof Error ? error : new Error('Signup failed');
+    throw error instanceof Error ? error : new Error('Email confirmation failed');
   }
 }
