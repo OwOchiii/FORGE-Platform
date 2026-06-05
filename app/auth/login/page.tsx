@@ -31,6 +31,8 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
+      // Wait a moment for auth state to update before redirecting
+      await new Promise(resolve => setTimeout(resolve, 500));
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
