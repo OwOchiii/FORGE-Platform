@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const { signup, user } = useAuth();
   const router = useRouter();
 
@@ -43,7 +44,11 @@ export default function SignupPage() {
 
     try {
       await signup(email, name, password);
-      router.push('/dashboard');
+      setIsSuccess(true);
+      // Redirect after 3 seconds
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed');
     } finally {
@@ -72,6 +77,17 @@ export default function SignupPage() {
         <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Get Started</h2>
 
+          {/* Success Message */}
+          {isSuccess && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-green-700">Account created successfully!</p>
+                <p className="text-xs text-green-600 mt-1">Redirecting to login...</p>
+              </div>
+            </div>
+          )}
+
           {/* Error Message */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
@@ -81,12 +97,12 @@ export default function SignupPage() {
           )}
 
           {/* Info */}
-          <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 flex items-start gap-2">
+          <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 flex items-start gap-2">
             <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <p>New accounts are created with trainee role. Contact admin for other roles.</p>
+            <p>New accounts are created with trainee role. Log in immediately after signup.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" style={{opacity: isSuccess ? 0.5 : 1}}>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
@@ -97,7 +113,7 @@ export default function SignupPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
-                disabled={isLoading}
+                disabled={isLoading || isSuccess}
                 required
               />
             </div>
@@ -112,7 +128,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                disabled={isLoading}
+                disabled={isLoading || isSuccess}
                 required
               />
             </div>
@@ -127,7 +143,7 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                disabled={isLoading}
+                disabled={isLoading || isSuccess}
                 required
               />
             </div>
@@ -142,7 +158,7 @@ export default function SignupPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                disabled={isLoading}
+                disabled={isLoading || isSuccess}
                 required
               />
             </div>
@@ -150,9 +166,9 @@ export default function SignupPage() {
             <Button
               type="submit"
               className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white font-semibold hover:from-orange-700 hover:to-red-700"
-              disabled={isLoading}
+              disabled={isLoading || isSuccess}
             >
-              {isLoading ? 'Creating account...' : 'Create Account'}
+              {isLoading ? 'Creating account...' : isSuccess ? 'Account created!' : 'Create Account'}
             </Button>
           </form>
 
