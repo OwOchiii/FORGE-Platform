@@ -17,7 +17,7 @@ export default function CourseAdminPage() {
   const courses = mockCourses.filter((c) => c.status !== 'archived');
 
   return (
-    <ProtectedRoute requiredRoles={['course_admin', 'platform_admin']}>
+    <ProtectedRoute requiredRoles={['course_admin']}>
       <div className="min-h-screen bg-gray-50">
         <Navbar />
 

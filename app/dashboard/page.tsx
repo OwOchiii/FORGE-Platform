@@ -36,7 +36,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredRoles={['trainee']}>
       <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
         <Navbar />
 
