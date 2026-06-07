@@ -29,7 +29,14 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   }
 
   if (requiredRoles && !requiredRoles.includes(user.role)) {
-    redirect('/dashboard');
+    // Redirect users without required roles to their own dashboard based on role
+    if (user.role === 'platform_admin') {
+      redirect('/admin/platform');
+    } else if (user.role === 'course_admin') {
+      redirect('/admin/courses');
+    } else {
+      redirect('/dashboard');
+    }
   }
 
   return <>{children}</>;

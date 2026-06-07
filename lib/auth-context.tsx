@@ -69,11 +69,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         // Fetch profile data
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('name, role')
           .eq('id', session.user.id)
           .single();
+        
+        console.log('[v0] Auth state changed - Profile fetched:', { id: session.user.id, profile, profileError });
         
         setUser({
           ...session.user,
