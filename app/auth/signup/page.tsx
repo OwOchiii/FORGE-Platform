@@ -41,13 +41,10 @@ export default function SignupPage() {
       await signup(email, name, password);
       
       setIsSuccess(true);
-      // Redirect after 3 seconds
-      setTimeout(() => {
-        router.push('/auth/login');
-      }, 3000);
+      // Redirect to login - user can log in immediately
+      router.push('/auth/login');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed');
-    } finally {
       setIsLoading(false);
     }
   };

@@ -31,12 +31,9 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      // Wait a moment for auth state to update before redirecting
-      await new Promise(resolve => setTimeout(resolve, 500));
-      router.push('/dashboard');
+      // Auth state change will trigger the useEffect redirect
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -70,14 +67,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Demo Credentials */}
-          <div className="mb-6 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/50 rounded-lg text-sm text-orange-700 dark:text-orange-300">
-            <p className="font-semibold mb-1">Demo Credentials:</p>
-            <p>Trainee: trainee@forge.com</p>
-            <p>Admin: admin@forge.com</p>
-            <p>Platform Admin: platform@forge.com</p>
-            <p className="mt-2">Any password works in demo mode</p>
-          </div>
+
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
