@@ -8,14 +8,13 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertCircle } from 'lucide-react';
-import { signIn } from 'next-auth/react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading, login } = useAuth();
   const router = useRouter();
 
   // If already logged in, redirect to dashboard
@@ -31,27 +30,22 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (res?.error) {
-        setError('Invalid credentials');
-      } else {
-        router.push('/dashboard');
-      }
+      await login(email, password);
+      // Auth state change will trigger the useEffect redirect
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-50 dark:from-slate-900 dark:to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-orange-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Back to Home Link */}
+        <Link href="/" className="inline-flex items-center text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 text-sm font-medium mb-6 transition-colors">
+          ← Back to Home
+        </Link>
+
         {/* Logo */}
         <div className="text-center mb-8">
           <Image
@@ -78,14 +72,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Demo Credentials */}
-          <div className="mb-6 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/50 rounded-lg text-sm text-orange-700 dark:text-orange-300">
-            <p className="font-semibold mb-1">Demo Credentials:</p>
-            <p>Trainee: trainee@forge.com</p>
-            <p>Admin: admin@forge.com</p>
-            <p>Platform Admin: platform@forge.com</p>
-            <p className="mt-2">Any password works in demo mode</p>
-          </div>
+
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -129,11 +116,16 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-3">
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               Don't have an account?{' '}
               <Link href="/auth/signup" className="text-orange-600 dark:text-orange-400 hover:text-orange-700 font-semibold">
                 Sign up
+              </Link>
+            </p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              <Link href="/auth/forgot-password" className="text-orange-600 dark:text-orange-400 hover:text-orange-700 font-semibold">
+                Forgot your password?
               </Link>
             </p>
           </div>

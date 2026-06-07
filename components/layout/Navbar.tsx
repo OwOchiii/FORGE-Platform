@@ -7,11 +7,10 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Menu, LogOut, Settings, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 
 export function Navbar() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -78,9 +77,9 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="gap-2 text-gray-800 dark:text-gray-200">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    {user.name.charAt(0)}
+                    {user.name?.charAt(0) || 'U'}
                   </div>
-                  <span className="hidden sm:inline text-sm">{user.name}</span>
+                  <span className="hidden sm:inline text-sm">{user.name || 'User'}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 dark:bg-slate-800 dark:border-slate-700">
@@ -88,7 +87,7 @@ export function Navbar() {
                   {user.email}
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled className="text-xs text-gray-500 dark:text-gray-400">
-                  Role: {user.role.replace('_', ' ')}
+                  Role: {user.role?.replace('_', ' ') || 'User'}
                 </DropdownMenuItem>
                 <div className="my-1 border-t dark:border-slate-700" />
                 <DropdownMenuItem asChild>
@@ -97,7 +96,7 @@ export function Navbar() {
                     Settings
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => signOut()} className="text-red-600 dark:text-red-400 cursor-pointer flex items-center gap-2 dark:hover:bg-slate-700">
+                <DropdownMenuItem onClick={() => logout()} className="text-red-600 dark:text-red-400 cursor-pointer flex items-center gap-2 dark:hover:bg-slate-700">
                   <LogOut className="w-4 h-4" />
                   Logout
                 </DropdownMenuItem>

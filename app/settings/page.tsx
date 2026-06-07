@@ -6,10 +6,52 @@ import { AIChat } from '@/components/layout/AIChat';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Bell, Lock, User, LogOut } from 'lucide-react';
+import { Bell, Lock, User, LogOut, AlertCircle, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, updatePassword } = useAuth();
+  const router = useRouter();
+  
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [isLoadingPassword, setIsLoadingPassword] = useState(false);
+
+  const handleChangePassword = async () => {
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      return;
+    }
+
+    setIsLoadingPassword(true);
+
+    try {
+      await updatePassword(newPassword);
+      setPasswordSuccess('Password updated successfully!');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => {
+        setShowChangePassword(false);
+        setPasswordSuccess('');
+      }, 2000);
+    } catch (err) {
+      setPasswordError(err instanceof Error ? err.message : 'Failed to update password');
+    } finally {
+      setIsLoadingPassword(false);
+    }
+  };
 
   return (
     <ProtectedRoute>
@@ -88,17 +130,73 @@ export default function SettingsPage() {
                 <p className="text-sm text-gray-600 mb-4">
                   Update your password to keep your account secure
                 </p>
-                <Button variant="outline" size="sm">
-                  Change Password
-                </Button>
+                
+                {!showChangePassword ? (
+                  <Button variant="outline" size="sm" onClick={() => setShowChangePassword(true)}>
+                    Change Password
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    {passwordError && (
+                      <div className="p-2 bg-red-50 border border-red-200 rounded flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-red-700">{passwordError}</p>
+                      </div>
+                    )}
+                    {passwordSuccess && (
+                      <div className="p-2 bg-green-50 border border-green-200 rounded flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-green-700">{passwordSuccess}</p>
+                      </div>
+                    )}
+                    <Input
+                      type="password"
+                      placeholder="New password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      disabled={isLoadingPassword}
+                    />
+                    <Input
+                      type="password"
+                      placeholder="Confirm password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={isLoadingPassword}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleChangePassword}
+                        disabled={isLoadingPassword}
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
+                      >
+                        {isLoadingPassword ? 'Updating...' : 'Update Password'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setShowChangePassword(false);
+                          setNewPassword('');
+                          setConfirmPassword('');
+                          setPasswordError('');
+                          setPasswordSuccess('');
+                        }}
+                        disabled={isLoadingPassword}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="font-medium text-gray-900 mb-2">Two-Factor Authentication</p>
+                <p className="font-medium text-gray-900 mb-2">Forgot Password?</p>
                 <p className="text-sm text-gray-600 mb-4">
-                  Add an extra layer of security to your account
+                  Reset your password by email
                 </p>
-                <Button variant="outline" size="sm">
-                  Enable 2FA
+                <Button variant="outline" size="sm" onClick={() => router.push('/auth/forgot-password')}>
+                  Reset Password
                 </Button>
               </div>
             </div>
