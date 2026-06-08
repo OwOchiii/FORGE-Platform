@@ -70,7 +70,6 @@ export default function PlatformAdminPage() {
 
   const handleChangeRole = async (userId: string, newRole: string) => {
     try {
-      console.log('[v0] Changing user role:', userId, 'to', newRole);
       await updateUserRole(supabase, userId, newRole);
       
       // Update local state
@@ -91,7 +90,6 @@ export default function PlatformAdminPage() {
   };
 
   const handleExportData = () => {
-    console.log('[v0] Exporting platform data...');
     const data = {
       users: users,
       stats: stats,
