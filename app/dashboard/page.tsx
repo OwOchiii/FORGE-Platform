@@ -4,8 +4,6 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Navbar } from '@/components/layout/Navbar';
 import { AIChat } from '@/components/layout/AIChat';
 import { useAuth } from '@/lib/auth-context';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { mockUserProgress, mockCourses } from '@/lib/mock-data';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -15,19 +13,7 @@ import { motion } from 'framer-motion';
 import { SimulatorProgressChart } from '@/components/simulator/SimulatorProgressChart';
 
 export default function DashboardPage() {
-  const { user, isLoading } = useAuth();
-  const router = useRouter();
-
-  // Redirect admins to their respective dashboards
-  useEffect(() => {
-    if (!isLoading && user) {
-      if (user.role === 'platform_admin') {
-        router.push('/admin/platform');
-      } else if (user.role === 'course_admin') {
-        router.push('/admin/courses');
-      }
-    }
-  }, [user, isLoading, router]);
+  const { user } = useAuth();
 
   // Get user's enrolled courses
   const enrolledCourses = mockUserProgress.filter((p) => p.userId === user?.id);
@@ -50,7 +36,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredRoles={['trainee']}>
       <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
         <Navbar />
 
