@@ -41,7 +41,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
       );
     }
     
-    if (!requiredRoles.includes(user.role)) {
+    if (!user.role || !requiredRoles.includes(user.role)) {
       // User doesn't have required role - redirect based on their actual role
       if (user.role === 'platform_admin') {
         redirect('/admin/platform');

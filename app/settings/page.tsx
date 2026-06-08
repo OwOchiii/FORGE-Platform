@@ -88,7 +88,7 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Role
                 </label>
-                <Input value={user?.role.replace('_', ' ').charAt(0).toUpperCase() + user?.role.replace('_', ' ').slice(1) || ''} disabled />
+                <Input value={(user?.role?.replace('_', ' ').charAt(0).toUpperCase() + user?.role?.replace('_', ' ').slice(1)) || ''} disabled />
               </div>
             </div>
           </div>

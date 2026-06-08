@@ -1,7 +1,7 @@
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Navbar } from '@/components/layout/Navbar';
 import { AIChat } from '@/components/layout/AIChat';
-import { mockCourses, mockModules, mockLessons, mockQuizzes } from '@/lib/mock-data';
+import { mockCourses, mockModules, mockLessons } from '@/lib/mock-data';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import Link from 'next/link';
