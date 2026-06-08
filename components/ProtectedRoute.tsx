@@ -28,14 +28,28 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     redirect('/auth/login');
   }
 
-  if (requiredRoles && !requiredRoles.includes(user.role)) {
-    // Redirect users without required roles to their own dashboard based on role
-    if (user.role === 'platform_admin') {
-      redirect('/admin/platform');
-    } else if (user.role === 'course_admin') {
-      redirect('/admin/courses');
-    } else {
-      redirect('/dashboard');
+  if (requiredRoles) {
+    if (!user.role) {
+      // Role not loaded yet, show loading
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading role...</p>
+          </div>
+        </div>
+      );
+    }
+    
+    if (!requiredRoles.includes(user.role)) {
+      // User doesn't have required role - redirect based on their actual role
+      if (user.role === 'platform_admin') {
+        redirect('/admin/platform');
+      } else if (user.role === 'course_admin') {
+        redirect('/admin/courses');
+      } else {
+        redirect('/dashboard');
+      }
     }
   }
 
