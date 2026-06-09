@@ -91,7 +91,7 @@ export default function LessonContent({
                 {/* Interactive Video Section */}
                 <div className="mb-8">
                   <InteractiveVideoPlayer
-                    videoUrl={lesson.videoUrl || 'https://www.youtube.com/embed/dQw4w9WgXcQ'}
+                    videoUrl={lesson.videoUrl || lesson.videoStoragePath || 'https://www.youtube.com/embed/dQw4w9WgXcQ'}
                     title={lesson.title}
                   />
                 </div>

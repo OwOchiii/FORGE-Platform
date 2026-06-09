@@ -40,6 +40,7 @@ export interface Lesson {
   title: string;
   content: string;
   videoUrl?: string;
+  videoStoragePath?: string;
   resources?: Record<string, string>[];
   order: number;
   createdAt: Date;
