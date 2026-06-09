@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Navbar } from '@/components/layout/Navbar';
 import { createClient } from '@/lib/supabase/client';
 import { getLessonById, updateLesson, getModulesByCourse, getLessonsByModule } from '@/lib/supabase/data';
+import { uploadVideoToStorage, getVideoPublicUrl, deleteVideoFromStorage, updateLessonContent } from '@/lib/supabase/storage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useParams, useRouter } from 'next/navigation';
@@ -11,7 +12,7 @@ import { useEffect, useState, useMemo } from 'react';
 import {
   ArrowLeft, Video, HelpCircle, Plus, Trash2, Check,
   Loader2, AlertCircle, ChevronRight, GripVertical,
-  PlayCircle, CheckCircle2, Circle, X,
+  PlayCircle, CheckCircle2, Circle, X, Upload, File,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -46,6 +47,7 @@ type DBLesson = {
   title: string;
   content: string | null;
   video_url: string | null;
+  video_storage_path: string | null;
   resources: any;
   order: number;
 };
@@ -64,14 +66,21 @@ function VideoEditor({
   lesson,
   onSave,
   saving,
+  supabase,
+  lessonId,
 }: {
   lesson: DBLesson;
   onSave: (updates: Partial<DBLesson>) => void;
   saving: boolean;
+  supabase: any;
+  lessonId: string;
 }) {
   const [title, setTitle] = useState(lesson.title);
   const [videoUrl, setVideoUrl] = useState(lesson.video_url ?? '');
   const [content, setContent] = useState(lesson.content ?? '');
+  const [videoStoragePath, setVideoStoragePath] = useState(lesson.video_storage_path ?? '');
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Detect YouTube embed
   function getYoutubeEmbed(url: string): string | null {
@@ -81,10 +90,37 @@ function VideoEditor({
 
   const embedUrl = videoUrl ? getYoutubeEmbed(videoUrl) : null;
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      setUploadProgress(0);
+
+      // Upload to Supabase Storage
+      const storagePath = await uploadVideoToStorage(supabase, file, lessonId);
+      
+      if (storagePath) {
+        setVideoStoragePath(storagePath);
+        const publicUrl = getVideoPublicUrl(supabase, storagePath);
+        setVideoUrl(publicUrl);
+        setUploadProgress(100);
+        setTimeout(() => setUploadProgress(0), 2000);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadProgress(0);
+    } finally {
+      setUploading(false);
+    }
+  }
+
   function handleSave() {
     onSave({
       title: title.trim(),
       video_url: videoUrl.trim() || null,
+      video_storage_path: videoStoragePath || null,
       content: content.trim(),
       resources: { type: 'video' } as VideoResources,
     });
@@ -103,26 +139,86 @@ function VideoEditor({
         />
       </div>
 
-      {/* Video URL */}
-      <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">
-          Video URL
-          <span className="text-slate-500 font-normal ml-2 text-xs">(YouTube, Vimeo, or direct MP4)</span>
-        </label>
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <PlayCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <Input
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              className="pl-9 bg-[#0d1b2e] border-slate-600 text-white focus:border-blue-500 placeholder:text-slate-500"
-              placeholder="https://youtube.com/watch?v=..."
-            />
+      {/* Video upload or URL */}
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-1.5">
+            Video Source
+          </label>
+          <div className="space-y-3">
+            {/* File upload */}
+            <div>
+              <label className="text-xs text-slate-400 font-medium">Upload Video File</label>
+              <div className="flex gap-2 mt-1.5">
+                <div className="relative flex-1">
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleFileUpload}
+                    disabled={uploading}
+                    className="hidden"
+                    id="video-upload"
+                  />
+                  <label
+                    htmlFor="video-upload"
+                    className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 border-dashed cursor-pointer transition ${
+                      uploading
+                        ? 'border-blue-600/50 bg-blue-900/10'
+                        : 'border-slate-600 hover:border-blue-500 hover:bg-slate-800/50'
+                    }`}
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+                        <span className="text-sm text-blue-400">Uploading... {uploadProgress}%</span>
+                      </>
+                    ) : videoStoragePath ? (
+                      <>
+                        <Check className="w-4 h-4 text-emerald-400" />
+                        <span className="text-sm text-emerald-400">Video uploaded</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 text-slate-400" />
+                        <span className="text-sm text-slate-400">Click to upload or drag & drop</span>
+                      </>
+                    )}
+                  </label>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">Supported: MP4, WebM, Ogg (max 500MB)</p>
+            </div>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-700" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-[#0f2744] text-slate-500">OR</span>
+              </div>
+            </div>
+
+            {/* YouTube/URL input */}
+            <div>
+              <label className="text-xs text-slate-400 font-medium">YouTube or Video URL</label>
+              <div className="flex gap-2 mt-1.5">
+                <div className="relative flex-1">
+                  <PlayCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Input
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    className="pl-9 bg-[#0d1b2e] border-slate-600 text-white focus:border-blue-500 placeholder:text-slate-500"
+                    placeholder="https://youtube.com/watch?v=... or video URL"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* YouTube preview */}
+      {/* Video preview */}
       {embedUrl && (
         <div className="aspect-video rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
           <iframe
@@ -131,6 +227,18 @@ function VideoEditor({
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             title="Video preview"
+          />
+        </div>
+      )}
+
+      {/* Uploaded video preview */}
+      {videoStoragePath && videoUrl && !embedUrl && (
+        <div className="aspect-video rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
+          <video
+            src={videoUrl}
+            controls
+            className="w-full h-full"
+            title="Uploaded video preview"
           />
         </div>
       )}
@@ -645,7 +753,7 @@ function LessonEditorContent({ courseId, lessonId }: { courseId: string; lessonI
             {/* Editor panel */}
             <div className="bg-[#0f2744] border border-slate-700 rounded-xl p-6">
               {lessonType === 'video' ? (
-                <VideoEditor lesson={lesson} onSave={handleSave} saving={saving} />
+                <VideoEditor lesson={lesson} onSave={handleSave} saving={saving} supabase={supabase} lessonId={lessonId} />
               ) : (
                 <QuizEditor lesson={lesson} onSave={handleSave} saving={saving} />
               )}
