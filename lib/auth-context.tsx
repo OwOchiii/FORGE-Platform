@@ -43,12 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .from('profiles')
             .select('name, role')
             .eq('id', authUser.id)
-            .single();
+            .single() as any;
           
           setUser({
             ...authUser,
-            name: profile?.name,
-            role: profile?.role,
+            name: (profile as any)?.name,
+            role: (profile as any)?.role,
           });
         } else {
           setUser(null);
@@ -73,16 +73,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from('profiles')
           .select('name, role')
           .eq('id', session.user.id)
-          .single();
+          .single() as any;
         
         setUser({
           ...session.user,
-          name: profile?.name,
-          role: profile?.role,
+          name: (profile as any)?.name || null,
+          role: (profile as any)?.role || null,
         });
       } else {
         setUser(null);
       }
+      setIsLoading(false);
     });
 
     return () => {

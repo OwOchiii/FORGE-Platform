@@ -4,23 +4,45 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Navbar } from '@/components/layout/Navbar';
 import { AIChat } from '@/components/layout/AIChat';
 import { useAuth } from '@/lib/auth-context';
-import { mockUserProgress, mockCourses } from '@/lib/mock-data';
+import { createClient } from '@/lib/supabase/client';
+import { getUserProgress, getCourses } from '@/lib/supabase/data';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, Award, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SimulatorProgressChart } from '@/components/simulator/SimulatorProgressChart';
+import { useState, useEffect } from 'react';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
+  const [allCourses, setAllCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Get user's enrolled courses
-  const enrolledCourses = mockUserProgress.filter((p) => p.userId === user?.id);
-  const courseDetails = enrolledCourses.map((progress) => ({
-    ...progress,
-    course: mockCourses.find((c) => c.id === progress.courseId),
-  }));
+  useEffect(() => {
+    async function loadData() {
+      try {
+        if (user?.id) {
+          const supabase = createClient();
+          
+          // Fetch user's enrollments with course details
+          const userProgress = await getUserProgress(supabase, user.id);
+          setEnrolledCourses(userProgress || []);
+
+          // Fetch all published courses for recommendations
+          const published = await getCourses(supabase, { status: 'published' });
+          setAllCourses(published || []);
+        }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, [user?.id]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -35,9 +57,29 @@ export default function DashboardPage() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
   };
 
+  const avgProgress = enrolledCourses.length > 0 
+    ? Math.round(enrolledCourses.reduce((sum, p) => sum + (p.progress_percentage || 0), 0) / enrolledCourses.length)
+    : 0;
+
+  const certifications = enrolledCourses.filter((p) => p.status === 'completed').length;
+
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-background text-foreground">
+          <Navbar />
+          <main className="max-w-7xl mx-auto px-4 py-8">
+            <div className="text-center">Loading dashboard...</div>
+          </main>
+          <AIChat />
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+      <div className="min-h-screen bg-background text-foreground">
         <Navbar />
 
         {/* Main Content */}
@@ -45,8 +87,8 @@ export default function DashboardPage() {
           <motion.div initial="hidden" animate="visible" variants={containerVariants}>
             {/* Welcome Header */}
             <motion.div variants={itemVariants} className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back, {user?.name}!</h1>
-              <p className="text-gray-600 dark:text-gray-400">Continue your learning journey and master new skills.</p>
+              <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {user?.name}!</h1>
+              <p className="text-muted-foreground">Continue your learning journey and master new skills.</p>
             </motion.div>
 
             {/* Quick Stats */}
@@ -61,13 +103,13 @@ export default function DashboardPage() {
                 {
                   icon: TrendingUp,
                   label: 'Average Progress',
-                  value: `${Math.round(enrolledCourses.reduce((sum, p) => sum + p.progressPercentage, 0) / enrolledCourses.length || 0)}%`,
+                  value: `${avgProgress}%`,
                   color: 'red',
                 },
                 {
                   icon: Award,
                   label: 'Certifications',
-                  value: enrolledCourses.filter((p) => p.status === 'completed').length,
+                  value: certifications,
                   color: 'green',
                 },
                 {
@@ -77,15 +119,13 @@ export default function DashboardPage() {
                   color: 'orange',
                 },
               ].map((stat, i) => (
-                <motion.div key={i} variants={itemVariants} className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-gray-200 dark:border-slate-700 shadow-sm transition-transform hover:scale-105">
+                <motion.div key={i} variants={itemVariants} className="bg-card border border-border rounded-lg p-6 shadow-sm transition-transform hover:scale-105">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">{stat.label}</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
+                      <p className="text-muted-foreground text-sm">{stat.label}</p>
+                      <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
                     </div>
-                    <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${stat.color}-100 dark:bg-${stat.color}-900/30 text-${stat.color}-600 dark:text-${stat.color}-400`}
-                    >
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${stat.color}-500/20 text-${stat.color}-400`}>
                       <stat.icon className="w-5 h-5" />
                     </div>
                   </div>
@@ -100,26 +140,26 @@ export default function DashboardPage() {
 
             {/* Continue Learning */}
             <motion.div variants={itemVariants} className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Continue Learning</h2>
-              {courseDetails.length > 0 ? (
+              <h2 className="text-2xl font-bold text-foreground mb-6">Continue Learning</h2>
+              {enrolledCourses.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {courseDetails.map((item) => (
-                    <div key={item.courseId} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition overflow-hidden">
-                      <div className="h-32 bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/40 dark:to-red-900/40" />
+                  {enrolledCourses.map((item: any) => (
+                    <div key={item.course_id} className="bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition overflow-hidden">
+                      <div className="h-32 bg-gradient-to-br from-primary/30 to-accent/20" />
                       <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{item.course?.title}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                          {item.course?.description}
+                        <h3 className="font-semibold text-foreground mb-2">{item.courses?.title || 'Course'}</h3>
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                          {item.courses?.description}
                         </p>
                         <div className="mb-4">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Progress</span>
-                            <span className="text-xs font-bold text-gray-900 dark:text-white">{item.progressPercentage}%</span>
+                            <span className="text-xs font-medium text-muted-foreground">Progress</span>
+                            <span className="text-xs font-bold text-foreground">{item.progress_percentage}%</span>
                           </div>
-                          <Progress value={item.progressPercentage} className="h-2 dark:bg-slate-700" />
+                          <Progress value={item.progress_percentage} className="h-2" />
                         </div>
-                        <Link href={`/courses/${item.courseId}`}>
-                          <Button size="sm" className="w-full bg-orange-600 hover:bg-orange-700 dark:bg-orange-500 dark:hover:bg-orange-600 text-white">
+                        <Link href={`/courses/${item.course_id}`}>
+                          <Button size="sm" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
                             Continue
                           </Button>
                         </Link>
@@ -128,14 +168,14 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-12 text-center">
-                  <BookOpen className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">No Courses Yet</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                <div className="bg-card border border-border rounded-lg p-12 text-center">
+                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="font-semibold text-foreground mb-2">No Courses Yet</h3>
+                  <p className="text-muted-foreground mb-6">
                     You haven't enrolled in any courses yet. Browse available courses to get started.
                   </p>
                   <Link href="/courses">
-                    <Button className="bg-orange-600 hover:bg-orange-700 dark:bg-orange-500 dark:hover:bg-orange-600 text-white">
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                       Explore Courses
                     </Button>
                   </Link>
@@ -145,23 +185,23 @@ export default function DashboardPage() {
 
             {/* Recommendations */}
             <motion.div variants={itemVariants}>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recommended for You</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-6">Recommended for You</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {mockCourses
-                  .filter((c) => !enrolledCourses.some((p) => p.courseId === c.id))
+                {allCourses
+                  .filter((c) => !enrolledCourses.some((p) => p.course_id === c.id))
                   .slice(0, 2)
                   .map((course) => (
-                    <div key={course.id} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 hover:shadow-md transition flex flex-col justify-between">
+                    <div key={course.id} className="bg-card border border-border p-6 hover:shadow-md transition flex flex-col justify-between rounded-lg">
                       <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{course.title}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{course.description}</p>
+                        <h3 className="font-semibold text-foreground mb-2">{course.title}</h3>
+                        <p className="text-sm text-muted-foreground mb-4">{course.description}</p>
                       </div>
                       <div className="flex items-center justify-between mt-auto">
-                        <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-3 py-1 rounded-full font-medium">
-                          {course.category}
+                        <span className="text-xs bg-primary/20 text-primary px-3 py-1 rounded-full font-medium">
+                          {course.category || 'General'}
                         </span>
                         <Link href={`/courses/${course.id}`}>
-                          <Button size="sm" variant="outline" className="dark:border-slate-600 dark:text-slate-300">
+                          <Button size="sm" variant="outline" className="border-border text-muted-foreground">
                             View
                           </Button>
                         </Link>

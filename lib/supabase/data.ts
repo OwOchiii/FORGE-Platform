@@ -39,6 +39,22 @@ export async function updateProfile(
   return data
 }
 
+export async function updateUserRole(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  newRole: string
+) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ role: newRole })
+    .eq('id', userId)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
 export async function getAllProfiles(supabase: SupabaseClient<Database>) {
   const { data, error } = await supabase
     .from('profiles')
@@ -47,6 +63,37 @@ export async function getAllProfiles(supabase: SupabaseClient<Database>) {
   
   if (error) throw error
   return data
+}
+
+export async function getPlatformStats(supabase: SupabaseClient<Database>) {
+  // Get total users
+  const { count: totalUsers, error: usersError } = await supabase
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+
+  // Get admin count
+  const { data: admins, error: adminsError } = await supabase
+    .from('profiles')
+    .select('id')
+    .or("role.eq.platform_admin,role.eq.course_admin")
+
+  // Get total enrollments
+  const { count: totalEnrollments, error: enrollError } = await supabase
+    .from('user_progress')
+    .select('id', { count: 'exact', head: true })
+
+  // Get completed courses
+  const { count: completedCourses, error: completeError } = await supabase
+    .from('user_progress')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'completed')
+
+  return {
+    totalUsers: totalUsers || 0,
+    totalAdmins: admins?.length || 0,
+    totalEnrollments: totalEnrollments || 0,
+    completedCourses: completedCourses || 0,
+  }
 }
 
 // ============================================

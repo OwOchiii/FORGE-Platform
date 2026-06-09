@@ -17,10 +17,16 @@ export default function LoginPage() {
   const { user, isLoading: isAuthLoading, login } = useAuth();
   const router = useRouter();
 
-  // If already logged in, redirect to dashboard
+  // Redirect to role-specific destination as soon as the user + role are known
   useEffect(() => {
     if (user && !isAuthLoading) {
-      router.push('/dashboard');
+      if (user.role === 'platform_admin') {
+        router.push('/admin/platform');
+      } else if (user.role === 'course_admin') {
+        router.push('/admin/courses');
+      } else {
+        router.push('/dashboard');
+      }
     }
   }, [user, isAuthLoading, router]);
 

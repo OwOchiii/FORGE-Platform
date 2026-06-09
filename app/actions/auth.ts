@@ -32,3 +32,42 @@ export async function confirmUserEmail(email: string) {
     throw error instanceof Error ? error : new Error('Email confirmation failed');
   }
 }
+
+export async function createPlatformAdmin(
+  email: string,
+  name: string,
+  password: string
+) {
+  // Create a platform admin account using admin API
+  const supabase = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  try {
+    // Create the auth user with admin API
+    const { data, error: createError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
+        name,
+        role: 'platform_admin',
+      },
+    });
+
+    if (createError) throw createError;
+
+    // Update the profile with platform_admin role
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ role: 'platform_admin' })
+      .eq('id', data.user.id);
+
+    if (profileError) throw profileError;
+
+    return { success: true, user: data.user };
+  } catch (error) {
+    throw error instanceof Error ? error : new Error('Failed to create platform admin');
+  }
+}

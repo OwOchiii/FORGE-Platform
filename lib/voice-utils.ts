@@ -503,6 +503,13 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
   }
 }
 
+declare global {
+  interface Window {
+    SpeechRecognition?: any;
+    webkitSpeechRecognition?: any;
+  }
+}
+
 /**
  * Use browser native speechSynthesis to speak text
  * @param text - The text to speak
