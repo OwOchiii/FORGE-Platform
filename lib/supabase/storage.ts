@@ -1,7 +1,19 @@
-'use server';
-
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from './database.types';
+
+/**
+ * Get public URL for a video in Supabase Storage (client-side)
+ * @param supabase - Supabase client
+ * @param storagePath - Path to the file in storage
+ * @returns Public URL
+ */
+export function getVideoPublicUrl(
+  supabase: SupabaseClient<Database>,
+  storagePath: string
+): string {
+  const { data } = supabase.storage.from('videos').getPublicUrl(storagePath);
+  return data?.publicUrl || '';
+}
 
 /**
  * Upload a video file to Supabase Storage
@@ -54,20 +66,6 @@ export async function uploadVideoToStorage(
 }
 
 /**
- * Get public URL for a video in Supabase Storage
- * @param supabase - Supabase client
- * @param storagePath - Path to the file in storage
- * @returns Public URL
- */
-export function getVideoPublicUrl(
-  supabase: SupabaseClient<Database>,
-  storagePath: string
-): string {
-  const { data } = supabase.storage.from('videos').getPublicUrl(storagePath);
-  return data?.publicUrl || '';
-}
-
-/**
  * Delete a video from Supabase Storage
  * @param supabase - Supabase client
  * @param storagePath - Path to the file in storage
@@ -85,45 +83,6 @@ export async function deleteVideoFromStorage(
     return true;
   } catch (error) {
     console.error('Error deleting video:', error);
-    return false;
-  }
-}
-
-/**
- * Save lesson with video storage path and/or MCQ questions
- * @param supabase - Supabase client
- * @param lessonId - Lesson ID to update
- * @param data - Lesson data to update (videoStoragePath and/or resources)
- */
-export async function updateLessonContent(
-  supabase: SupabaseClient<Database>,
-  lessonId: string,
-  data: {
-    videoStoragePath?: string | null;
-    resources?: Record<string, any>;
-  }
-): Promise<boolean> {
-  try {
-    const updateData: any = {};
-    if (data.videoStoragePath !== undefined) {
-      updateData.video_storage_path = data.videoStoragePath;
-    }
-    if (data.resources !== undefined) {
-      updateData.resources = data.resources;
-    }
-
-    const { error } = await supabase
-      .from('lessons')
-      .update(updateData)
-      .eq('id', lessonId);
-
-    if (error) {
-      console.error('Error updating lesson:', error);
-      return false;
-    }
-    return true;
-  } catch (error) {
-    console.error('Error updating lesson:', error);
     return false;
   }
 }

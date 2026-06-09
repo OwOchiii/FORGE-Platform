@@ -4,7 +4,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Navbar } from '@/components/layout/Navbar';
 import { createClient } from '@/lib/supabase/client';
 import { getLessonById, updateLesson, getModulesByCourse, getLessonsByModule } from '@/lib/supabase/data';
-import { uploadVideoToStorage, getVideoPublicUrl, deleteVideoFromStorage, updateLessonContent } from '@/lib/supabase/storage';
+import { uploadVideoToStorage, getVideoPublicUrl, deleteVideoFromStorage } from '@/lib/supabase/storage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useParams, useRouter } from 'next/navigation';
