@@ -1,12 +1,8 @@
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { Navbar } from '@/components/layout/Navbar';
-import { AIChat } from '@/components/layout/AIChat';
 import { createClient } from '@/lib/supabase/server';
 import { getCourseWithModulesAndLessons } from '@/lib/supabase/data';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import Link from 'next/link';
-import { ChevronDown, ChevronUp, BookOpen, CheckCircle2 } from 'lucide-react';
 import CourseDetailContent from '@/components/course/CourseDetailContent';
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ courseId: string }> }) {
