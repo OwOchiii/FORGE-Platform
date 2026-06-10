@@ -106,6 +106,7 @@ export interface Database {
           title: string
           content: string | null
           video_url: string | null
+          video_storage_path: string | null
           resources: Json
           order: number
           created_at: string
@@ -116,6 +117,7 @@ export interface Database {
           title: string
           content?: string | null
           video_url?: string | null
+          video_storage_path?: string | null
           resources?: Json
           order?: number
           created_at?: string
@@ -126,6 +128,7 @@ export interface Database {
           title?: string
           content?: string | null
           video_url?: string | null
+          video_storage_path?: string | null
           resources?: Json
           order?: number
           created_at?: string

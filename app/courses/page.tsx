@@ -5,20 +5,23 @@ import { Navbar } from '@/components/layout/Navbar';
 import { AIChat } from '@/components/layout/AIChat';
 import { useAuth } from '@/lib/auth-context';
 import { createClient } from '@/lib/supabase/client';
-import { getCourses, getUserProgress } from '@/lib/supabase/data';
+import { getCourses, getUserProgress, enrollInCourse } from '@/lib/supabase/data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { Search, Filter } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Search, Filter, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function CoursesPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [courses, setCourses] = useState<any[]>([]);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [enrollingId, setEnrollingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -43,6 +46,25 @@ export default function CoursesPage() {
 
     loadData();
   }, [user?.id]);
+
+  async function handleEnroll(courseId: string) {
+    if (!user?.id) return;
+    setEnrollingId(courseId);
+    try {
+      const supabase = createClient();
+      if (!enrolledCourseIds.includes(courseId)) {
+        await enrollInCourse(supabase, user.id, courseId);
+        setEnrolledCourseIds((prev) => [...prev, courseId]);
+      }
+      router.push(`/courses/${courseId}`);
+    } catch (err) {
+      console.error('Enrollment error:', err);
+      // Navigate anyway even if enroll fails (e.g. already enrolled unique constraint)
+      router.push(`/courses/${courseId}`);
+    } finally {
+      setEnrollingId(null);
+    }
+  }
 
   const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -157,17 +179,20 @@ export default function CoursesPage() {
 
                       {/* Footer */}
                       <div className="mt-auto">
-                        <Link href={`/courses/${course.id}`}>
-                          <Button
-                            className={`w-full ${
-                              isEnrolled
-                                ? 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                            }`}
-                          >
-                            {isEnrolled ? 'Continue' : 'Enroll Now'}
-                          </Button>
-                        </Link>
+                        <Button
+                          onClick={() => handleEnroll(course.id)}
+                          disabled={enrollingId === course.id}
+                          className={`w-full ${
+                            isEnrolled
+                              ? 'bg-muted text-muted-foreground hover:bg-muted/80'
+                              : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                          }`}
+                        >
+                          {enrollingId === course.id
+                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                            : isEnrolled ? 'Continue' : 'Enroll Now'
+                          }
+                        </Button>
                       </div>
                     </div>
                   </div>
