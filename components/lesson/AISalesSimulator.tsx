@@ -22,11 +22,34 @@ interface ConversationMessage {
   mimeType?: string;
 }
 
+interface SimulatorConfig {
+  projectName?: string;
+  salesPitch?: string;
+  productType?: string;
+  description?: string;
+  customerPersona?: string;
+  openingCustomerMessage?: string;
+  goal?: string;
+  keyFeatures?: string[];
+  commonObjections?: string[];
+  commonQuestions?: string[];
+  questionTopics?: string[];
+  salesTips?: string[];
+  scoringCriteria?: { good?: string; average?: string; bad?: string };
+  feedbackRules?: Record<string, string>;
+  stageRules?: { early?: string; mid?: string; closing?: string; complete?: string };
+  priceInfo?: string;
+  location?: string;
+  mode?: string;
+}
+
 interface AISalesSimulatorProps {
   productName: string;
   productDescription: string;
   productPrice: string;
   scenarioDescription: string;
+  customSystemPrompt?: string;
+  simulatorConfig?: SimulatorConfig;
 }
 
 export default function AISalesSimulator({
@@ -34,6 +57,8 @@ export default function AISalesSimulator({
   productDescription,
   productPrice,
   scenarioDescription,
+  customSystemPrompt,
+  simulatorConfig,
 }: AISalesSimulatorProps) {
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -60,7 +85,8 @@ export default function AISalesSimulator({
   // Initialize conversation with AI greeting
   useEffect(() => {
     const initializeConversation = async () => {
-      const aiGreeting = `Chào bạn, tôi đang quan tâm đến ${productName}. Bạn có thể giới thiệu rõ hơn về sản phẩm này cho tôi được không?`;
+      const aiGreeting = simulatorConfig?.openingCustomerMessage
+        || `Chào bạn, tôi đang quan tâm đến ${productName}. Bạn có thể giới thiệu rõ hơn về sản phẩm này cho tôi được không?`;
 
       const initialMsg: ConversationMessage = {
         role: 'ai',
@@ -210,18 +236,22 @@ export default function AISalesSimulator({
         ? Math.round(turnScores.reduce((sum, score) => sum + score, 0) / turnScores.length)
         : 50;
 
-      const response = await fetch('/api/sales-simulator/customer-response', {
+      const response = await fetch('/api/ai-sales-response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          traineMessage: userMessage,
+          userMessage,
           productName,
           productDescription,
           productPrice,
-          conversationHistory: conversation,
+          conversationHistory: conversation.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
           turnCount: Math.floor((conversation.length + 1) / 2),
           sessionScore: finalSessionScore,
-          scenario: persona,
+          ...(customSystemPrompt ? { customSystemPrompt } : {}),
+          ...(simulatorConfig ? { simulatorConfig } : {}),
         }),
       });
 
@@ -259,11 +289,11 @@ export default function AISalesSimulator({
         localStorage.setItem('forge-simulator-history', JSON.stringify(history));
       }
 
-      // Get TTS audio
+      // Get TTS audio via ElevenLabs (falls back to Gemini TTS internally)
       let audioBase64 = '';
       let mimeType = '';
       try {
-        const ttsResponse = await fetch('/api/text-to-speech', {
+        const ttsResponse = await fetch('/api/elevenlabs-tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: aiMessage, language: 'vi-VN' }),
@@ -272,7 +302,7 @@ export default function AISalesSimulator({
         if (ttsResponse.ok) {
           const ttsData = await ttsResponse.json();
           audioBase64 = ttsData.audioBase64 || '';
-          mimeType = ttsData.mimeType || 'audio/L16;codec=pcm;rate=24000';
+          mimeType = ttsData.mimeType || 'audio/mpeg';
         }
       } catch (ttsError) {
         console.warn('[AISalesSimulator] TTS request failed:', ttsError);

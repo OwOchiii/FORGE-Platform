@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { AIChat } from '@/components/layout/AIChat';
+import AISalesSimulator from '@/components/lesson/AISalesSimulator';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, CheckCircle, HelpCircle, Video, Check, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, HelpCircle, Video, Check, X, MessageSquare } from 'lucide-react';
 
 // DB-shaped types (snake_case, as returned from Supabase)
 type DBLesson = {
@@ -42,6 +43,14 @@ type DBCourse = {
 type MCQOption = { id: string; text: string };
 type MCQQuestion = { id: string; question: string; options: MCQOption[]; correctId: string };
 type QuizResources = { type: 'quiz'; questions: MCQQuestion[] };
+  type AIConversationResources = {
+  type: 'ai_conversation';
+  instruction: string;
+  items: string;
+  systemPrompt: string;
+  useDefaultPrompt: boolean;
+  simulatorConfig?: Record<string, unknown>;
+  };
 
 interface LessonContentProps {
   lesson: DBLesson;
@@ -231,10 +240,15 @@ export default function LessonContent({
   const nextLesson = currentIndex < sortedLessons.length - 1 ? sortedLessons[currentIndex + 1] : null;
   const progressPercent = ((currentIndex + 1) / sortedLessons.length) * 100;
 
-  const isQuiz = (lesson.resources as any)?.type === 'quiz';
+  const lessonResourceType = (lesson.resources as any)?.type;
+  const isQuiz = lessonResourceType === 'quiz';
+  const isAIConversation = lessonResourceType === 'ai_conversation';
   const quizQuestions: MCQQuestion[] = isQuiz
     ? ((lesson.resources as QuizResources)?.questions ?? [])
     : [];
+  const aiConvResources = isAIConversation
+    ? (lesson.resources as AIConversationResources)
+    : null;
 
   const videoUrl = lesson.video_url || lesson.video_storage_path || '';
 
@@ -263,7 +277,9 @@ export default function LessonContent({
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                {isQuiz
+                {isAIConversation
+                  ? <MessageSquare className="w-5 h-5 text-orange-500" />
+                  : isQuiz
                   ? <HelpCircle className="w-5 h-5 text-purple-500" />
                   : <Video className="w-5 h-5 text-blue-500" />
                 }
@@ -280,8 +296,34 @@ export default function LessonContent({
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
 
-              {/* Video or Quiz */}
-              {isQuiz ? (
+              {/* AI Conversation, Video or Quiz */}
+              {isAIConversation ? (
+                <div className="space-y-4">
+                  {/* Instruction card */}
+                  {aiConvResources?.instruction && (
+                    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm p-6">
+                      <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2">Your Task</h2>
+                      <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                        {aiConvResources.instruction}
+                      </p>
+                    </div>
+                  )}
+                  <AISalesSimulator
+                    productName={aiConvResources?.items?.split('\n')[0]?.split('—')[0]?.trim() || 'Product'}
+                    productDescription={aiConvResources?.items || ''}
+                    productPrice={
+                    aiConvResources?.items?.match(/\$[\d,]+(?:\/\w+)?/)?.[0] || 'Contact for pricing'
+                    }
+                    scenarioDescription={aiConvResources?.instruction || lesson.title}
+                    customSystemPrompt={
+                    aiConvResources && !aiConvResources.useDefaultPrompt
+                    ? aiConvResources.systemPrompt
+                    : undefined
+                    }
+                    simulatorConfig={aiConvResources?.simulatorConfig as any}
+                  />
+                </div>
+              ) : isQuiz ? (
                 <QuizPlayer questions={quizQuestions} />
               ) : videoUrl ? (
                 <VideoPlayer videoUrl={videoUrl} />
@@ -295,7 +337,7 @@ export default function LessonContent({
               )}
 
               {/* Lesson Notes / Transcript */}
-              {!isQuiz && lesson.content && (
+              {!isQuiz && !isAIConversation && lesson.content && (
                 <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm p-8">
                   <div
                     className="prose prose-sm md:prose-base max-w-none text-gray-700 dark:text-gray-300 dark:prose-headings:text-white dark:prose-strong:text-white dark:prose-a:text-blue-400"
@@ -305,7 +347,7 @@ export default function LessonContent({
               )}
 
               {/* My Notes */}
-              {!isQuiz && (
+              {!isQuiz && !isAIConversation && (
                 <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm p-6">
                   <button
                     onClick={() => setShowNotes(!showNotes)}
@@ -373,7 +415,9 @@ export default function LessonContent({
                   <div className="space-y-1">
                     {sortedLessons.map((l) => {
                       const isActive = l.id === lesson.id;
-                      const isLessonQuiz = (l.resources as any)?.type === 'quiz';
+                      const lessonRType = (l.resources as any)?.type;
+                      const isLessonQuiz = lessonRType === 'quiz';
+                      const isLessonAI = lessonRType === 'ai_conversation';
                       return (
                         <Link
                           key={l.id}
@@ -384,7 +428,9 @@ export default function LessonContent({
                               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700'
                           }`}
                         >
-                          {isLessonQuiz
+                          {isLessonAI
+                            ? <MessageSquare className="w-3.5 h-3.5 shrink-0 text-orange-500" />
+                            : isLessonQuiz
                             ? <HelpCircle className="w-3.5 h-3.5 shrink-0 text-purple-500" />
                             : <Video className="w-3.5 h-3.5 shrink-0 text-blue-400" />
                           }

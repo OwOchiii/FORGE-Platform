@@ -68,13 +68,15 @@ export async function POST(request: NextRequest) {
                   },
                 },
                 {
-                  text: 'Transcribe this audio exactly as spoken. Return ONLY the transcribed text, nothing else. No explanations, no formatting, just the text.',
+                  text: `Transcribe this audio exactly as spoken. The audio may be in Vietnamese (tiếng Việt) or English. 
+If it is Vietnamese, preserve all diacritical marks (dấu thanh, dấu mũ, etc.) accurately.
+Return ONLY the transcribed text, nothing else. No explanations, no formatting, just the verbatim text.`,
                 },
               ],
             },
           ],
           generationConfig: {
-            maxOutputTokens: 500,
+            maxOutputTokens: 800,
             temperature: 0,
           },
         }),

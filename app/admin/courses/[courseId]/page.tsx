@@ -16,13 +16,13 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   ArrowLeft, Plus, Video, HelpCircle, GripVertical,
   Pencil, Trash2, Loader2, AlertCircle, Check, ChevronDown,
-  ChevronRight, BookOpen, Globe, FileText, X,
+  ChevronRight, BookOpen, Globe, FileText, X, MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type LessonType = 'video' | 'quiz';
+type LessonType = 'video' | 'quiz' | 'ai_conversation';
 
 type DBLesson = {
   id: string;
@@ -54,7 +54,10 @@ type DBCourse = {
 };
 
 function lessonTypeFromDB(lesson: DBLesson): LessonType {
-  return (lesson.resources as any)?.type === 'quiz' ? 'quiz' : 'video';
+  const t = (lesson.resources as any)?.type;
+  if (t === 'quiz') return 'quiz';
+  if (t === 'ai_conversation') return 'ai_conversation';
+  return 'video';
 }
 
 // ── Module item ────────────────────────────────────────────────────────────────
@@ -73,9 +76,13 @@ function LessonRow({
     <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-slate-800/40 border border-slate-700/50 group hover:bg-slate-800/70 transition-colors">
       <GripVertical className="w-3.5 h-3.5 text-slate-600 shrink-0 cursor-grab" />
       <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
-        type === 'video' ? 'bg-blue-900/60' : 'bg-purple-900/60'
+        type === 'ai_conversation' ? 'bg-orange-900/60'
+        : type === 'video' ? 'bg-blue-900/60'
+        : 'bg-purple-900/60'
       }`}>
-        {type === 'video'
+        {type === 'ai_conversation'
+          ? <MessageSquare className="w-3.5 h-3.5 text-orange-400" />
+          : type === 'video'
           ? <Video className="w-3.5 h-3.5 text-blue-400" />
           : <HelpCircle className="w-3.5 h-3.5 text-purple-400" />
         }
@@ -204,7 +211,7 @@ function ModuleSection({
   );
 }
 
-// ── Add Lesson modal ───────────────────────────────────────────────────────────
+// ── Add Lesson modal ─────────────────────────────────────────────────���─────────
 
 function AddLessonModal({
   moduleId,
@@ -261,24 +268,27 @@ function AddLessonModal({
           {/* Type picker */}
           <div>
             <p className="text-sm font-medium text-slate-300 mb-2">Lesson type</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {([
                 { id: 'video' as LessonType, label: 'Video Lecture', icon: Video, color: 'blue' },
-                { id: 'quiz' as LessonType, label: 'Multiple Choice', icon: HelpCircle, color: 'purple' },
+                { id: 'quiz' as LessonType, label: 'MCQ Quiz', icon: HelpCircle, color: 'purple' },
+                { id: 'ai_conversation' as LessonType, label: 'AI Conversation', icon: MessageSquare, color: 'orange' },
               ] as const).map(({ id, label, icon: Icon, color }) => (
                 <button
                   key={id}
                   onClick={() => setType(id)}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
                     type === id
                       ? color === 'blue'
                         ? 'border-blue-500 bg-blue-900/30 text-blue-300'
+                        : color === 'orange'
+                        ? 'border-orange-500 bg-orange-900/30 text-orange-300'
                         : 'border-purple-500 bg-purple-900/30 text-purple-300'
                       : 'border-slate-700 bg-slate-800/30 text-slate-400 hover:border-slate-500'
                   }`}
                 >
-                  <Icon className="w-6 h-6" />
-                  <span className="text-xs font-medium">{label}</span>
+                  <Icon className="w-5 h-5" />
+                  <span className="text-xs font-medium text-center leading-tight">{label}</span>
                 </button>
               ))}
             </div>
@@ -291,7 +301,11 @@ function AddLessonModal({
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={type === 'video' ? 'e.g. Introduction to Sales' : 'e.g. Module 1 Quiz'}
+              placeholder={
+                type === 'video' ? 'e.g. Introduction to Sales'
+                : type === 'ai_conversation' ? 'e.g. Pitch a CRM to a skeptical buyer'
+                : 'e.g. Module 1 Quiz'
+              }
               className="bg-[#0d1b2e] border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500"
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               autoFocus
