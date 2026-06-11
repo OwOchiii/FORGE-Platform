@@ -43,13 +43,14 @@ type DBCourse = {
 type MCQOption = { id: string; text: string };
 type MCQQuestion = { id: string; question: string; options: MCQOption[]; correctId: string };
 type QuizResources = { type: 'quiz'; questions: MCQQuestion[] };
-type AIConversationResources = {
+  type AIConversationResources = {
   type: 'ai_conversation';
   instruction: string;
   items: string;
   systemPrompt: string;
   useDefaultPrompt: boolean;
-};
+  simulatorConfig?: Record<string, unknown>;
+  };
 
 interface LessonContentProps {
   lesson: DBLesson;
@@ -311,14 +312,15 @@ export default function LessonContent({
                     productName={aiConvResources?.items?.split('\n')[0]?.split('—')[0]?.trim() || 'Product'}
                     productDescription={aiConvResources?.items || ''}
                     productPrice={
-                      aiConvResources?.items?.match(/\$[\d,]+(?:\/\w+)?/)?.[0] || 'Contact for pricing'
+                    aiConvResources?.items?.match(/\$[\d,]+(?:\/\w+)?/)?.[0] || 'Contact for pricing'
                     }
                     scenarioDescription={aiConvResources?.instruction || lesson.title}
                     customSystemPrompt={
-                      aiConvResources && !aiConvResources.useDefaultPrompt
-                        ? aiConvResources.systemPrompt
-                        : undefined
+                    aiConvResources && !aiConvResources.useDefaultPrompt
+                    ? aiConvResources.systemPrompt
+                    : undefined
                     }
+                    simulatorConfig={aiConvResources?.simulatorConfig as any}
                   />
                 </div>
               ) : isQuiz ? (
