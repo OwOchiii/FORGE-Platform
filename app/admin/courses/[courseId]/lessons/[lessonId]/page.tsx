@@ -7,18 +7,20 @@ import { getLessonById, updateLesson, getModulesByCourse, getLessonsByModule } f
 import { uploadVideoToStorage, getVideoPublicUrl, deleteVideoFromStorage } from '@/lib/supabase/storage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import AIConversationEditor from '@/components/lesson/AIConversationEditor';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
 import {
   ArrowLeft, Video, HelpCircle, Plus, Trash2, Check,
   Loader2, AlertCircle, ChevronRight, GripVertical,
   PlayCircle, CheckCircle2, Circle, X, Upload, File,
+  MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type LessonType = 'video' | 'quiz';
+type LessonType = 'video' | 'quiz' | 'ai_conversation';
 
 type MCQOption = {
   id: string;
@@ -53,7 +55,10 @@ type DBLesson = {
 };
 
 function getLessonType(lesson: DBLesson): LessonType {
-  return (lesson.resources as any)?.type === 'quiz' ? 'quiz' : 'video';
+  const t = (lesson.resources as any)?.type;
+  if (t === 'quiz') return 'quiz';
+  if (t === 'ai_conversation') return 'ai_conversation';
+  return 'video';
 }
 
 function uid() {
@@ -584,7 +589,9 @@ function SidebarNav({
                       : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                   }`}
                 >
-                  {item.type === 'video'
+                  {item.type === 'ai_conversation'
+                    ? <MessageSquare className="w-3.5 h-3.5 shrink-0 text-orange-400" />
+                    : item.type === 'video'
                     ? <Video className="w-3.5 h-3.5 shrink-0 text-blue-400" />
                     : <HelpCircle className="w-3.5 h-3.5 shrink-0 text-purple-400" />
                   }
@@ -728,9 +735,13 @@ function LessonEditorContent({ courseId, lessonId }: { courseId: string; lessonI
             {/* Header */}
             <div className="flex items-center gap-3 mb-8">
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                lessonType === 'video' ? 'bg-blue-900/60' : 'bg-purple-900/60'
+                lessonType === 'ai_conversation' ? 'bg-orange-900/60'
+                : lessonType === 'video' ? 'bg-blue-900/60'
+                : 'bg-purple-900/60'
               }`}>
-                {lessonType === 'video'
+                {lessonType === 'ai_conversation'
+                  ? <MessageSquare className="w-5 h-5 text-orange-400" />
+                  : lessonType === 'video'
                   ? <Video className="w-5 h-5 text-blue-400" />
                   : <HelpCircle className="w-5 h-5 text-purple-400" />
                 }
@@ -745,14 +756,20 @@ function LessonEditorContent({ courseId, lessonId }: { courseId: string; lessonI
                   )}
                 </div>
                 <p className="text-slate-400 text-sm">
-                  {lessonType === 'video' ? 'Video Lecture' : 'Multiple Choice Quiz'}
+                  {lessonType === 'ai_conversation'
+                    ? 'AI Conversation Task'
+                    : lessonType === 'video'
+                    ? 'Video Lecture'
+                    : 'Multiple Choice Quiz'}
                 </p>
               </div>
             </div>
 
             {/* Editor panel */}
             <div className="bg-[#0f2744] border border-slate-700 rounded-xl p-6">
-              {lessonType === 'video' ? (
+              {lessonType === 'ai_conversation' ? (
+                <AIConversationEditor lesson={lesson} onSave={handleSave} saving={saving} />
+              ) : lessonType === 'video' ? (
                 <VideoEditor lesson={lesson} onSave={handleSave} saving={saving} supabase={supabase} lessonId={lessonId} />
               ) : (
                 <QuizEditor lesson={lesson} onSave={handleSave} saving={saving} />

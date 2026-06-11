@@ -176,6 +176,7 @@ export async function POST(request: NextRequest) {
       conversationHistory,
       turnCount = 1,
       sessionScore = 50,
+      customSystemPrompt,
     } = await request.json();
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -210,7 +211,10 @@ export async function POST(request: NextRequest) {
       parts: [{ text: userMessage }],
     });
 
-    const systemPrompt = `Bạn là KHÁCH HÀNG, không phải nhân viên bán hàng.
+    // If the lesson has a custom system prompt, use it with stage instruction appended
+    const systemPrompt = customSystemPrompt
+      ? `${customSystemPrompt}\n\n${stageInstruction}`
+      : `Bạn là KHÁCH HÀNG, không phải nhân viên bán hàng.
 
 Sản phẩm: ${productName}
 Giá: ${productPrice}

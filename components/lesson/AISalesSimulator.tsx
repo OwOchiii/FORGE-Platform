@@ -27,6 +27,7 @@ interface AISalesSimulatorProps {
   productDescription: string;
   productPrice: string;
   scenarioDescription: string;
+  customSystemPrompt?: string;
 }
 
 export default function AISalesSimulator({
@@ -34,6 +35,7 @@ export default function AISalesSimulator({
   productDescription,
   productPrice,
   scenarioDescription,
+  customSystemPrompt,
 }: AISalesSimulatorProps) {
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -210,18 +212,21 @@ export default function AISalesSimulator({
         ? Math.round(turnScores.reduce((sum, score) => sum + score, 0) / turnScores.length)
         : 50;
 
-      const response = await fetch('/api/sales-simulator/customer-response', {
+      const response = await fetch('/api/ai-sales-response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          traineMessage: userMessage,
+          userMessage,
           productName,
           productDescription,
           productPrice,
-          conversationHistory: conversation,
+          conversationHistory: conversation.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
           turnCount: Math.floor((conversation.length + 1) / 2),
           sessionScore: finalSessionScore,
-          scenario: persona,
+          ...(customSystemPrompt ? { customSystemPrompt } : {}),
         }),
       });
 
