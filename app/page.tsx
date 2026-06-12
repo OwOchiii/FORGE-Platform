@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BookOpen, MessageSquare, Award, Users } from 'lucide-react';
+import { ArrowRight, BookOpen, MessageSquare, Award, Users, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Home() {
@@ -164,6 +164,155 @@ export default function Home() {
               <p className="text-gray-600 dark:text-gray-400">Completion Rate</p>
             </div>
           </div>
+        </motion.div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4 text-balance">
+            Bảng giá
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+            Chọn gói phù hợp với quy mô và nhu cầu đào tạo Sales của bạn.
+          </p>
+        </motion.div>
+
+        <motion.div
+          className="grid md:grid-cols-3 gap-8 items-stretch"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
+          }}
+        >
+          {/* FREE */}
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}
+            className="flex flex-col rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-sm"
+          >
+            <div className="mb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-orange-500 dark:text-orange-400 mb-2">Free</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Trải nghiệm FORGE</h3>
+              <div className="flex items-end gap-1 mt-4">
+                <span className="text-4xl font-extrabold text-gray-900 dark:text-white">0₫</span>
+                <span className="text-gray-500 dark:text-gray-400 mb-1">/ tháng</span>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 leading-relaxed">
+                Khám phá cách FORGE giúp Sales luyện tập với khách hàng AI.
+              </p>
+            </div>
+            <ul className="flex flex-col gap-3 flex-1 mb-8">
+              {[
+                'Tham gia lớp học demo',
+                'Thực hành AI Sales Simulation',
+                'Nhận đánh giá sau mỗi phiên luyện tập',
+                'Theo dõi kết quả cá nhân',
+                'Tham gia lớp học được mời',
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
+                  <Check className="w-4 h-4 shrink-0 text-orange-500 dark:text-orange-400 mt-0.5" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/auth/signup">
+              <Button variant="outline" className="w-full dark:border-slate-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-slate-700 transition-colors">
+                Bắt đầu miễn phí
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* TEAM — highlighted */}
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}
+            className="flex flex-col rounded-2xl border-2 border-orange-500 dark:border-orange-500 bg-white dark:bg-slate-800 p-8 shadow-xl relative"
+          >
+            <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-600 to-red-600 text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+              Phổ biến nhất
+            </span>
+            <div className="mb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-orange-500 dark:text-orange-400 mb-2">Team</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Xây dựng hệ thống đào tạo Sales</h3>
+              <div className="flex items-end gap-1 mt-4">
+                <span className="text-4xl font-extrabold text-gray-900 dark:text-white">4.900.000₫</span>
+                <span className="text-gray-500 dark:text-gray-400 mb-1">/ tháng</span>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 leading-relaxed">
+                Biến dữ liệu sản phẩm thành môi trường đào tạo thực chiến.
+              </p>
+            </div>
+            <ul className="flex flex-col gap-3 flex-1 mb-8">
+              {[
+                'Tạo và quản lý lớp học',
+                'Upload tài liệu sản phẩm',
+                'AI tạo Customer Archetypes',
+                'Chỉnh sửa và phê duyệt Archetypes',
+                'Dashboard quản lý học viên',
+                'Fact-checking sau mô phỏng',
+                'Tối đa 20 học viên',
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
+                  <Check className="w-4 h-4 shrink-0 text-orange-500 dark:text-orange-400 mt-0.5" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/auth/signup">
+              <Button className="w-full bg-gradient-to-r from-orange-600 to-red-600 dark:from-orange-500 dark:to-red-500 text-white hover:from-orange-700 hover:to-red-700 transition-transform hover:scale-105">
+                Bắt đầu dùng thử
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* ENTERPRISE */}
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}
+            className="flex flex-col rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-sm"
+          >
+            <div className="mb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-orange-500 dark:text-orange-400 mb-2">Enterprise</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Triển khai cho doanh nghiệp</h3>
+              <div className="flex items-end gap-1 mt-4">
+                <span className="text-2xl font-extrabold text-gray-900 dark:text-white leading-tight">Liên hệ báo giá</span>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 leading-relaxed">
+                Tùy chỉnh FORGE theo quy trình và dữ liệu riêng của doanh nghiệp.
+              </p>
+            </div>
+            <ul className="flex flex-col gap-3 flex-1 mb-8">
+              {[
+                'Nhiều quản trị viên',
+                'Quản lý nhiều phòng ban',
+                'CRM Integration',
+                'API Integration',
+                'Dashboard phân tích nâng cao',
+                'So sánh hiệu suất giữa các nhóm',
+                'Organization Rules tùy chỉnh',
+                'Hỗ trợ triển khai chuyên sâu',
+                'Số lượng học viên linh hoạt',
+                'Customer Success Manager riêng',
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
+                  <Check className="w-4 h-4 shrink-0 text-orange-500 dark:text-orange-400 mt-0.5" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/auth/signup">
+              <Button variant="outline" className="w-full dark:border-slate-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-slate-700 transition-colors">
+                Liên hệ ngay
+              </Button>
+            </Link>
+          </motion.div>
         </motion.div>
       </section>
 
