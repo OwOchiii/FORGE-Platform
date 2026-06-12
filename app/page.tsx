@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BookOpen, MessageSquare, Award, Users } from 'lucide-react';
+import { ArrowRight, BookOpen, MessageSquare, Award, Users, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Home() {
@@ -164,6 +164,155 @@ export default function Home() {
               <p className="text-gray-600 dark:text-gray-400">Completion Rate</p>
             </div>
           </div>
+        </motion.div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4 text-balance">
+            Pricing
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+            Choose a plan that fits your team size and sales training needs.
+          </p>
+        </motion.div>
+
+        <motion.div
+          className="grid md:grid-cols-3 gap-8 items-stretch"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
+          }}
+        >
+          {/* FREE */}
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}
+            className="flex flex-col rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-sm"
+          >
+            <div className="mb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-orange-500 dark:text-orange-400 mb-2">Free</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Experience FORGE</h3>
+              <div className="flex items-end gap-1 mt-4">
+                <span className="text-4xl font-extrabold text-gray-900 dark:text-white">$0</span>
+                <span className="text-gray-500 dark:text-gray-400 mb-1">/ month</span>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 leading-relaxed">
+                Discover how FORGE helps sales reps practice with AI customers.
+              </p>
+            </div>
+            <ul className="flex flex-col gap-3 flex-1 mb-8">
+              {[
+                'Access demo classes',
+                'Practice AI Sales Simulations',
+                'Get feedback after each session',
+                'Track personal progress',
+                'Join invited classes',
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
+                  <Check className="w-4 h-4 shrink-0 text-orange-500 dark:text-orange-400 mt-0.5" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/auth/signup">
+              <Button variant="outline" className="w-full dark:border-slate-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-slate-700 transition-colors">
+                Start free
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* TEAM — highlighted */}
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}
+            className="flex flex-col rounded-2xl border-2 border-orange-500 dark:border-orange-500 bg-white dark:bg-slate-800 p-8 shadow-xl relative"
+          >
+            <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-600 to-red-600 text-white text-xs font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+              Most popular
+            </span>
+            <div className="mb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-orange-500 dark:text-orange-400 mb-2">Team</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Build your sales training system</h3>
+              <div className="flex items-end gap-1 mt-4">
+                <span className="text-4xl font-extrabold text-gray-900 dark:text-white">$199</span>
+                <span className="text-gray-500 dark:text-gray-400 mb-1">/ month</span>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 leading-relaxed">
+                Turn product data into a real-world training environment.
+              </p>
+            </div>
+            <ul className="flex flex-col gap-3 flex-1 mb-8">
+              {[
+                'Create and manage classes',
+                'Upload product documentation',
+                'AI generates customer archetypes',
+                'Edit and approve archetypes',
+                'Student dashboard',
+                'Fact-checking after simulations',
+                'Up to 20 students',
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
+                  <Check className="w-4 h-4 shrink-0 text-orange-500 dark:text-orange-400 mt-0.5" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/auth/signup">
+              <Button className="w-full bg-gradient-to-r from-orange-600 to-red-600 dark:from-orange-500 dark:to-red-500 text-white hover:from-orange-700 hover:to-red-700 transition-transform hover:scale-105">
+                Start trial
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* ENTERPRISE */}
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}
+            className="flex flex-col rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-sm"
+          >
+            <div className="mb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-orange-500 dark:text-orange-400 mb-2">Enterprise</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Enterprise deployment</h3>
+              <div className="flex items-end gap-1 mt-4">
+                <span className="text-2xl font-extrabold text-gray-900 dark:text-white leading-tight">Custom pricing</span>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 leading-relaxed">
+                Customize FORGE for your organization's workflows and data.
+              </p>
+            </div>
+            <ul className="flex flex-col gap-3 flex-1 mb-8">
+              {[
+                'Multiple admins',
+                'Multi-department management',
+                'CRM integration',
+                'API access',
+                'Advanced analytics dashboard',
+                'Cross-team performance comparison',
+                'Custom organization rules',
+                'Dedicated implementation support',
+                'Unlimited students',
+                'Customer Success Manager',
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
+                  <Check className="w-4 h-4 shrink-0 text-orange-500 dark:text-orange-400 mt-0.5" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/auth/signup">
+              <Button variant="outline" className="w-full dark:border-slate-600 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-slate-700 transition-colors">
+                Contact sales
+              </Button>
+            </Link>
+          </motion.div>
         </motion.div>
       </section>
 
