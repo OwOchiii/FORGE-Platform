@@ -6,7 +6,8 @@ import { AIChat } from '@/components/layout/AIChat';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Bell, Lock, User, LogOut, AlertCircle, CheckCircle } from 'lucide-react';
+import { Bell, Lock, User, LogOut, AlertCircle, CheckCircle, Zap } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -200,6 +201,23 @@ export default function SettingsPage() {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Upgrade Plan */}
+          <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-lg border border-orange-200 dark:border-orange-500/30 p-6 mb-6">
+            <h2 className="text-xl font-bold text-orange-900 dark:text-orange-400 mb-1 flex items-center gap-2">
+              <Zap className="w-5 h-5" />
+              Upgrade Your Plan
+            </h2>
+            <p className="text-sm text-orange-800 dark:text-orange-300 mb-4">
+              You are currently on the Free plan. Upgrade to Team to unlock AI customer archetypes, class management, and up to 20 students.
+            </p>
+            <Button asChild className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white gap-2 shadow-sm">
+              <Link href="/upgrade">
+                <Zap className="w-4 h-4" />
+                Upgrade to Team — $199/mo
+              </Link>
+            </Button>
           </div>
 
           {/* Danger Zone */}
