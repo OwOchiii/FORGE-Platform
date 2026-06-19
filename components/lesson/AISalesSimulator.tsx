@@ -377,9 +377,9 @@ export default function AISalesSimulator({
   };
 
   return (
-    <div className="w-full min-h-0 h-[800px] bg-white/50 dark:bg-slate-800/30 rounded-[2rem] p-4 lg:p-6 border border-gray-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
+    <div className="w-full min-h-screen bg-white/50 dark:bg-slate-800/30 rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200 dark:border-slate-700 shadow-sm transition-colors duration-300">
       {/* Main Container */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-8 min-h-0 h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 min-h-[calc(100vh-200px)]">
         {/* Conversation Panel */}
         <div className="lg:col-span-3 min-h-0 flex flex-col bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden">
           {/* Header */}
@@ -428,7 +428,7 @@ export default function AISalesSimulator({
 
         {/* Messages */}
         <div
-          className="min-h-0 flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50"
+          className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50"
           role="log"
           aria-label="Conversation messages"
           aria-live="polite"
@@ -436,18 +436,18 @@ export default function AISalesSimulator({
           {conversation.map((msg) => (
             <div
               key={msg.id}
-              className={`flex gap-3 max-w-[85%] ${msg.role === 'user' ? 'ml-auto justify-end' : 'mr-auto justify-start'}`}
+              className={`flex gap-2 sm:gap-3 max-w-full sm:max-w-[85%] ${msg.role === 'user' ? 'ml-auto justify-end' : 'mr-auto justify-start'}`}
               role="article"
               aria-label={`${msg.role === 'user' ? 'Your message' : 'AI response'}: ${msg.content}`}
             >
               <div
-                className={`rounded-2xl p-4 shadow-sm ${
+                className={`rounded-2xl p-3 sm:p-4 shadow-sm text-sm sm:text-[15px] ${
                   msg.role === 'user'
                     ? 'bg-orange-500 text-white rounded-br-none'
                     : 'bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-800 dark:text-gray-200 rounded-bl-none'
                 }`}
               >
-                <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
+                <p className="leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
                 <span
                   className={`text-xs mt-2 block ${msg.role === 'user' ? 'text-orange-100' : 'text-gray-400 dark:text-gray-500'}`}
                   aria-label={`Sent at ${msg.timestamp.toLocaleTimeString()}`}
@@ -483,12 +483,12 @@ export default function AISalesSimulator({
         </div>
 
         {/* Mode Toggle */}
-        <div className="shrink-0">
+        <div className="shrink-0 border-b border-gray-200 dark:border-slate-700 lg:border-b-0">
           <ModeToggle mode={mode} onModeChange={setMode} />
         </div>
 
         {/* Input Area */}
-        <div className="shrink-0 flex flex-col bg-gray-50/50 dark:bg-slate-800/50">
+        <div className="shrink-0 flex flex-col bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700 lg:border-t-0">
           {/* Error/Feedback */}
           {errorMessage && (
             <div className="border-b border-gray-200 dark:border-slate-700 bg-red-50 dark:bg-red-900/10 p-4">
@@ -514,14 +514,14 @@ export default function AISalesSimulator({
 
           {/* Voice Mode Input */}
           {!isConversationComplete && mode === 'voice' && (
-            <div className="border-t border-gray-200 dark:border-slate-700 p-5 space-y-4 shrink-0 bg-white dark:bg-slate-800">
+            <div className="border-t border-gray-200 dark:border-slate-700 p-4 sm:p-6 space-y-4 sm:space-y-6 shrink-0 bg-white dark:bg-slate-800">
               {transcription && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl text-sm text-blue-900 dark:text-blue-300 border border-blue-100 dark:border-blue-900/50">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 sm:p-4 rounded-xl text-sm text-blue-900 dark:text-blue-300 border border-blue-100 dark:border-blue-900/50">
                   <span className="font-semibold block mb-1">Your transcription:</span> {transcription}
                 </div>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   onClick={isRecording ? stopRecording : startRecording}
                   disabled={isLoading || isSpeaking}
@@ -545,9 +545,9 @@ export default function AISalesSimulator({
                   )}
                 </Button>
                 {isSpeaking && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-xl text-sm border border-orange-100 dark:border-orange-900/50">
+                  <div className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2 bg-orange-50 dark:bg-orange-900/20 rounded-xl text-sm border border-orange-100 dark:border-orange-900/50 whitespace-nowrap">
                     <Volume2 className="w-5 h-5 animate-pulse text-orange-600 dark:text-orange-400" />
-                    <span className="text-orange-700 dark:text-orange-400 font-medium hidden sm:inline">AI Speaking...</span>
+                    <span className="text-orange-700 dark:text-orange-400 font-medium">AI Speaking...</span>
                   </div>
                 )}
               </div>
@@ -568,7 +568,7 @@ export default function AISalesSimulator({
       </div>
 
       {/* Sidebar */}
-      <div className="lg:col-span-1 min-h-0 overflow-y-auto space-y-6 lg:pl-2 custom-scrollbar">
+      <div className="lg:col-span-2 min-h-0 overflow-y-auto space-y-5 sm:space-y-6 lg:space-y-8 custom-scrollbar">
         {/* Customer Avatar */}
         <CustomerAvatarCard 
           isSpeaking={isSpeaking}
@@ -577,15 +577,15 @@ export default function AISalesSimulator({
         />
 
         {/* Product Info */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-5 shadow-sm">
-          <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-4 sm:p-5 shadow-sm">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
             <span className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-orange-600 dark:text-orange-400">📦</span>
             Product Details
           </h3>
-          <div className="space-y-3 text-sm">
+          <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
             <div className="bg-gray-50 dark:bg-slate-900/50 p-3 rounded-xl border border-transparent dark:border-slate-700">
               <p className="font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider mb-1">Name</p>
-              <p className="text-gray-900 dark:text-gray-200 font-medium">{productName}</p>
+              <p className="text-gray-900 dark:text-gray-200 font-medium break-words">{productName}</p>
             </div>
             <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-xl border border-orange-100 dark:border-orange-500/20">
               <p className="font-semibold text-orange-800 dark:text-orange-400 text-xs uppercase tracking-wider mb-1">Price</p>
@@ -599,14 +599,14 @@ export default function AISalesSimulator({
         </div>
 
         {/* Sales Score */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-5 shadow-sm">
-          <h3 className="font-bold text-gray-900 dark:text-white mb-4">Sales Performance</h3>
-          <div className="space-y-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-4 sm:p-5 shadow-sm">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">Sales Performance</h3>
+          <div className="space-y-3 sm:space-y-4">
             {/* Current Turn Score */}
             <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-500/20 p-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold text-orange-900 dark:text-orange-400">Current Turn</span>
-                <span className="text-3xl font-bold text-orange-600 dark:text-orange-400">{Math.round(salesScore)}</span>
+                <span className="text-xs sm:text-sm font-semibold text-orange-900 dark:text-orange-400">Current Turn</span>
+                <span className="text-2xl sm:text-3xl font-bold text-orange-600 dark:text-orange-400">{Math.round(salesScore)}</span>
               </div>
               <p className="text-xs text-orange-700 dark:text-orange-300 leading-relaxed">{feedback}</p>
             </div>
@@ -614,8 +614,8 @@ export default function AISalesSimulator({
             {/* Final Session Score */}
             <div className="bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-500/20 p-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold text-green-900 dark:text-green-400">Session Avg</span>
-                <span className="text-3xl font-bold text-green-600 dark:text-green-400">
+                <span className="text-xs sm:text-sm font-semibold text-green-900 dark:text-green-400">Session Avg</span>
+                <span className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
                   {Math.round(finalSessionScore)}
                 </span>
               </div>
@@ -638,7 +638,7 @@ export default function AISalesSimulator({
 
         {/* Feedback */}
         {feedback && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-4 shadow-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-4 sm:p-5 shadow-sm">
             <div className="flex gap-3">
               {feedback.includes('Great') || feedback.includes('Excellent') ? (
                 <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -646,29 +646,29 @@ export default function AISalesSimulator({
                 <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
               )}
               <div>
-                <h4 className="font-semibold text-sm text-gray-900 dark:text-white">Feedback</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{feedback}</p>
+                <h4 className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white">Feedback</h4>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">{feedback}</p>
               </div>
             </div>
           </div>
         )}
 
         {/* Scenario */}
-        <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-2xl border border-orange-200 dark:border-orange-500/20 p-5 shadow-sm relative overflow-hidden">
+        <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-2xl border border-orange-200 dark:border-orange-500/20 p-4 sm:p-5 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 dark:bg-orange-500/10 rounded-full blur-3xl" />
-          <h4 className="font-bold text-orange-900 dark:text-orange-400 mb-3 flex items-center gap-2">
+          <h4 className="font-bold text-orange-900 dark:text-orange-400 mb-2 sm:mb-3 flex items-center gap-2 text-xs sm:text-sm">
             <span className="w-8 h-8 rounded-full bg-white dark:bg-orange-900/40 flex items-center justify-center text-orange-600 dark:text-orange-400 shadow-sm border border-orange-100 dark:border-transparent">🎯</span>
             Scenario
           </h4>
-          <p className="text-sm text-orange-800 dark:text-orange-200 leading-relaxed relative z-10">{scenarioDescription}</p>
+          <p className="text-xs sm:text-sm text-orange-800 dark:text-orange-200 leading-relaxed relative z-10">{scenarioDescription}</p>
         </div>
 
         {/* Stage Progress */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-5 shadow-sm">
-          <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-4 sm:p-5 shadow-sm">
+          <h4 className="font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 flex items-center gap-2 text-xs sm:text-sm">
             <span className="text-gray-400 dark:text-gray-500">📍</span> Stage Progress
           </h4>
-          <div className="space-y-3 text-sm">
+          <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
             {['early', 'mid', 'closing'].map((stage) => (
               <div key={stage} className="flex items-center gap-3">
                 <div

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Menu, LogOut, Settings, Sun, Moon } from 'lucide-react';
+import { Menu, LogOut, Settings, Sun, Moon, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 
@@ -47,6 +47,13 @@ export function Navbar() {
             </Link>
             <Link href="/courses" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium">
               Courses
+            </Link>
+            <Link
+              href="/upgrade"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-orange-600 to-red-600 text-white hover:from-orange-700 hover:to-red-700 transition-all shadow-sm shadow-orange-500/20"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              Upgrade
             </Link>
             {user.role === 'course_admin' && (
               <Link href="/admin/courses" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium">
@@ -91,6 +98,12 @@ export function Navbar() {
                 </DropdownMenuItem>
                 <div className="my-1 border-t dark:border-slate-700" />
                 <DropdownMenuItem asChild>
+                  <Link href="/upgrade" className="flex items-center gap-2 cursor-pointer text-orange-600 dark:text-orange-400 dark:hover:bg-slate-700 font-semibold">
+                    <Zap className="w-4 h-4" />
+                    Upgrade to Team
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link href="/settings" className="flex items-center gap-2 cursor-pointer dark:text-gray-200 dark:hover:bg-slate-700">
                     <Settings className="w-4 h-4" />
                     Settings
@@ -118,6 +131,10 @@ export function Navbar() {
             </Link>
             <Link href="/courses" className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800">
               Courses
+            </Link>
+            <Link href="/upgrade" className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-slate-800">
+              <Zap className="w-4 h-4" />
+              Upgrade to Team
             </Link>
             {user.role === 'course_admin' && (
               <Link href="/admin/courses" className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800">
